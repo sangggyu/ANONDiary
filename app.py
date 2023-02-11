@@ -22,10 +22,11 @@ db = client.dbsparta
 
 @app.route('/')
 def home():
-#   isLogin = api_valid()
-#   print(isLogin, file=sys.stderr)
-#   return render_template('index.html',isLogin=isLogin['result'])
-    return render_template('index.html')
+  isLogin = api_valid()
+  if isLogin['result']:
+    return render_template('index.html',isLogin=isLogin['result'])
+  else:
+    return render_template('index.html',isLogin=isLogin['result'])
 
 # 메인페이지 일기 보여주기
 @app.route("/diary", methods=["GET"])
@@ -94,15 +95,16 @@ def api_valid():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         userinfo = db.users.find_one({'id': payload['id']}, {'_id': 0})
         # return jsonify({'result': 'success', 'nickname': userinfo['nick']})
-        return {'result': 'True', 'nickname': userinfo['nick']}
+        return {'result': True, 'nickname': userinfo['nick']}
 
     except jwt.ExpiredSignatureError:
         # return jsonify({'result': 'fail', 'msg': '로그인 시간이 만료되었습니다.'})
-        return False
+        return {'result': False}
 
     except jwt.exceptions.DecodeError:
         # return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
-        return False
+        return {'result': False}
+
 #     ---------
 
 @app.route('/create_page')
