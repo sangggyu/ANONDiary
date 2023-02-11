@@ -16,15 +16,17 @@ function show_content() {
       // console.log(response);
       let rows = response["list"];
       for (let i = 0; i < rows.length; i++) {
-        let num = rows[i]["num"];
+        let num = rows[i]["diaryid"];
         let title = rows[i]["title"];
+        let view = rows[i]["view"];
+        let nickname = rows[i]["nickname"];
         let content = rows[i]["content"];
         let temp_html = `<tr>
                           <th scope="row">${num}</th>
                           <td><a href="/detail/${num}">${title}</a></td>
-                          <td>Otto</td>
+                          <td>${nickname}</td>
                           <td>@mdo</td>
-                          <td>@mdo</td>
+                          <td>${view}</td>
                         </tr>`;
         $(".total_diary").append(temp_html);
       }

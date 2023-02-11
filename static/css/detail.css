@@ -1,3 +1,61 @@
+
+.container {
+  width: 100%;
+}
+.container .section {
+  width: 100%;
+}
+.container .section div,
+.container .section h3 {
+  margin-top: 30px;
+}
+.container .section .detailinfo {
+  border-bottom: 1px solid #dfe1e7;
+}
+.container .section .detailinfo ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: baseline;
+  align-items: center;
+  padding-left: 0;
+}
+.container .section .detailinfo li {
+  list-style: none;
+  margin-right: 20px;
+}
+
+.commentbox {
+  padding-top: 30px;
+  border-top: 1px solid #dfe1e7;
+}
+.commentbox .input-group {
+  width: 50%;
+  margin: auto;
+  padding: auto;
+}
+.commentbox .mybox {
+  width: 60%;
+  margin: auto;
+  padding: auto;
+}
+.commentbox .mybox li.comment {
+  justify-content: space-between;
+}
+.commentbox .mybox li.comment .comment_content {
+  width: 88%;
+  padding: 6px 12px;
+  border: 1px solid #dfe1e7;
+  border-radius: 10px;
+}
+.commentbox .mybox li.comment .comment_content .nickname {
+  font-size: 11px;
+  color: rgb(88, 88, 88);
+}
+.commentbox .mybox li.comment div {
+  margin: auto;
+  padding: auto;
+}/*# sourceMappingURL=detail.css.map */
+
 .box {
   width: 75%;
   height: 670px;
@@ -24,3 +82,4 @@ a {
 textarea {
   resize: none;
 }
+

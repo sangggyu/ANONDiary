@@ -1,9 +1,19 @@
 import sys, json
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 
 app = Flask(__name__)
 
 from pymongo import MongoClient
+
+import hashlib
+import datetime
+
+import jwt
+
+#유저인증위한 JWT라이브러리
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity,get_jwt
+#로그아웃 기능구현
+from flask_jwt_extended import get_jti
 
 import certifi
 ca = certifi.where()
@@ -14,7 +24,11 @@ db = client.dbsparta
 
 @app.route('/')
 def home():
-  return render_template('index.html')
+  isLogin = api_valid()
+  if isLogin['result']:
+    return render_template('index.html',isLogin=isLogin['result'])
+  else:
+    return render_template('index.html',isLogin=isLogin['result'])
 
 @app.route('/register')
 def register():
@@ -44,8 +58,8 @@ def diary_save():
 # 메인페이지 일기 보여주기
 @app.route("/diary", methods=["GET"])
 def diary_get():
-    list_data = list(db.diary.find({}, {'_id': False}))
-    return jsonify({'list': list_data})
+  list_data = list(db.diary.find({}, {'_id': False}))
+  return jsonify({'list': list_data})
 
 # 메인페이지 search 기능
 @app.route("/search", methods=['POST'])
@@ -54,43 +68,93 @@ def search_get():
   list_data = list(db.diary.find({"title": {"$regex": search}}, {'_id': False}))
   return render_template('search.html', list=list_data)
 
-# 일기 추가
-# @app.route('/content', methods=["POST",'GET'])
-# def content_post():
-#   if request.method == "POST":
-#     title = request.form['title']
-#     content = request.form['content']
-#     # print(title, content, file=sys.stderr)
+# ------- 로그인
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
-#     count = list(db.diary.find({}, {'_id': False}))
-#     num = len(count) + 1
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
-#     doc = {
-#     'num': num,
-#     'title': title,
-#     'content': content,
-#     }
-#     db.diary.insert_one(doc)
-#     return jsonify({'msg': '일기 등록 완료!'})
-#   else:
-#     return render_template('post.html')
+# 회원가입 API
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    nickname_receive = request.form['nickname_give']
+
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+
+    result = db.users.find_one({'id': id_receive})
+
+    if result is not None:
+        return jsonify({'result': 'fail', 'msg': '이미 존재하는 ID입니다!'})
+    else:
+        db.users.insert_one({'id': id_receive, 'pw': pw_hash, 'nick': nickname_receive})
+        return jsonify({'result': 'success'})
+
+SECRET_KEY = 'SPARTA'
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+    result = db.users.find_one({'id': id_receive, 'pw': pw_hash})
+
+    if result is not None:
+        payload = {
+            'id': id_receive,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        # token을 준다.
+        return jsonify({'result': 'success', 'token': token})
+        # 찾지 못하면
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+# @app.route('/api/nick', methods=['GET'])
+def api_valid():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        userinfo = db.users.find_one({'id': payload['id']}, {'_id': 0})
+        # return jsonify({'result': 'success', 'nickname': userinfo['nick']})
+        return {'result': True, 'nickname': userinfo['nick']}
+
+    except jwt.ExpiredSignatureError:
+        # return jsonify({'result': 'fail', 'msg': '로그인 시간이 만료되었습니다.'})
+        return {'result': False}
+
+    except jwt.exceptions.DecodeError:
+        # return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
+        return {'result': False}
+
+#     ---------
 
 @app.route('/create_page')
 def createpage():
-    return render_template('create.html')
+    isLogin = api_valid()
+    if isLogin['result']:
+        return render_template('create.html', isLogin=isLogin['nickname'])
+    else:
+        return render_template('login.html')
 
 @app.route('/create', methods=["POST"])
 def create():
-    title = request.form['name']
+    title = request.form['title']
     content = request.form['comment']
     count = list(db.diary.find({},{'_id':False}))
 
     if count == []:
-        num = 1
+        diaryid = 1
         doc = {
-            'num':num,
+            'diaryid':diaryid,
             'title':title,
-            'content':content
+            'content':content,
+            'view': 0,
         }
         db.diary.insert_one(doc)
         return jsonify({'msg': '작성완료'})
@@ -98,12 +162,13 @@ def create():
         return jsonify({'msg':'내용을 입력해주세요'})
     else:
         done = count[len(count) - 1]
-        num = done['num']
-        num = num + 1
+        diaryid = done['diaryid']
+        diaryid = diaryid + 1
         doc = {
-            'num':num,
+            'diaryid':diaryid,
             'title':title,
-            'content':content
+            'content':content,
+            'view': 0,
         }
         db.diary.insert_one(doc)
         return jsonify({'msg':'작성완료'})
@@ -116,9 +181,10 @@ def detail(param):
 
 @app.route("/detail/<param>", methods=["POST"])
 def get_data(param):
-  num = int(param)
-  print(num,file=sys.stderr)
-  detail_data = db.diary.find_one({'num': num},{'_id':False})
+  diaryid = int(param)
+  print(diaryid,file=sys.stderr)
+  detail_data = db.diary.find_one_and_update({'diaryid': diaryid},{"$inc":{"view":1}},{'_id':False})
+  # detail_data = db.diary.find_one({'diaryid': diaryid},{'_id':False})
   return jsonify({'data': detail_data})
 # diary_modify 페이지
 @app.route("/diary/modify_open/<param>")
@@ -149,61 +215,39 @@ def update_modify(param):
   db.diary.update_one({'num': num}, {'$set': {'title': title,'content':content}})
   return jsonify({'msg': '수정 완료!'})
 
-# ------- 로그인
-# 회원가입 API
-@app.route('/api/register', methods=['POST'])
-def api_register():
-    id_receive = request.form['id_give']
-    pw_receive = request.form['pw_give']
-    nickname_receive = request.form['nickname_give']
+# detail > comment
+# 댓글 등록
+@app.route("/commentsave", methods=["POST"])
+def comment_post():
+    comment_receive = request.form["comment_give"]
+    diaryid = request.form["param_give"]
+    count = list(db.comment.find({}, {'_id': False}))
+    commentid = len(count) + 1
 
-    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+    doc = {
+        'commentid': commentid,
+        'diaryid': diaryid,
+        'comment': comment_receive,
+    }
+    db.comment.insert_one(doc)
 
-    result = db.user.find_one({'id': id_receive})
+    return jsonify({'msg': '등록 완료!'})
 
-    if result is not None:
-        return jsonify({'result': 'fail', 'msg': '이미 존재하는 ID입니다!'})
-    else:
-        db.user.insert_one({'id': id_receive, 'pw': pw_hash, 'nick': nickname_receive})
-        return jsonify({'result': 'success'})
+# 댓글 데이터 불러오기
+@app.route("/commentshow", methods=["POST"])
+def comment_get():
+    recive_contentid = request.form['give_contentid']
 
-    return render_template('login.html')
+    comment_list = list(db.comment.find(
+        {'diaryid': recive_contentid}, {'_id': False}))
+    return jsonify({'commentlist': comment_list})
 
-@app.route('/api/login', methods=['POST'])
-def api_login():
-    id_receive = request.form['id_give']
-    pw_receive = request.form['pw_give']
-
-    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
-
-    result = db.user.find_one({'id': id_receive, 'pw': pw_hash})
-
-    if result is not None:
-        payload = {
-            'id': id_receive,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        # token을 준다.
-        return jsonify({'result': 'success', 'token': token})
-        # 찾지 못하면
-    else:
-        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
-
-@app.route('/api/nick', methods=['GET'])
-def api_valid():
-    token_receive = request.cookies.get('mytoken')
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        userinfo = db.user.find_one({'id': payload['id']}, {'_id': 0})
-        return jsonify({'result': 'success', 'nickname': userinfo['nick']})
-
-    except jwt.ExpiredSignatureError:
-        return jsonify({'result': 'fail', 'msg': '로그인 시간이 만료되었습니다.'})
-
-    except jwt.exceptions.DecodeError:
-        return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
-#     ---------
+# 삭제 버튼
+@app.route("/comment/delete", methods=["POST"])
+def delete_comment():
+    deletenum_receive = request.form["deletenum_give"]
+    db.comment.delete_one({'commentid': int(deletenum_receive)})
+    return jsonify({'msg': '삭제 완료'})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)

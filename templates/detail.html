@@ -14,21 +14,37 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9943d403d9bf3ae9286778e8bb29358b"></script>
   <script src="https://kit.fontawesome.com/8924a45e02.js" crossorigin="anonymous"></script>
+  <script defer src="../static/js/detail.js"></script>
+  <link rel="stylesheet" href="../static/css/detail.css">
   <title>상세페이지</title>
 
   <script>
     function get_data(param) {
-      console.log(param);
+      // console.log(param);
       let data = [];
       $.ajax({
         type: "POST",
         url: "/detail/" + param,
         data: {},
         success: function(res) {
-          console.log(res);
+          // console.log(res);
           data = res.data;
+          let diaryid = data.diaryid
           let title = data.title;
           let content = data.content;
+          let view = data.view;
+          let temp_html = `<h3 class="title">${title}</h3>
+          <div class="detailinfo">
+            <ul>
+              <li>글번호 : ${diaryid}</li>
+              <li>작성자</li>
+              <li>등록일</li>
+              <li>조회수 : ${view}</li>
+            </ul>
+          </div>
+          <div class="content">${content}</div>`;
+          $("#content").append(temp_html);
+
           let temp_html = ``;
           temp_html =`<div class="box">
                         <div>
@@ -45,11 +61,53 @@
                      </div>
           `
           $(".container").append(temp_html);
+
         }
       })
     }
+
+    function show_comment(param) {
+      console.log(param);
+      $("#comment-list").empty();
+      $.ajax({
+        type: "POST",
+        url: "/commentshow",
+        data: {
+          give_contentid: param
+        },
+        success: function(response) {
+          let rows = response["commentlist"];
+          for (let i = 0; i < rows.length; i++) {
+            let comment = rows[i]["comment"];
+            let commentid = rows[i]["commentid"];
+            let diaryid = rows[i]["diaryid"];
+            let temp_html = `<li class="comment">
+                              <div class="comment_content">
+                                <div class="nickname">닉네임</div>
+                                <div>${comment}</div>
+                              </div>
+                              <div class="btn">
+                                <button onclick="delete_comment(${commentid})" type="button" class="btn btn-primary">delete</button>
+                              </div>
+                            </li>`;
+            $("#comment-list").append(temp_html);
+          }
+        },
+      });
+    }
   </script>
   <style>
+    li.comment {
+      list-style: none;
+      display: flex;
+      margin: 20px;
+    }
+
+    li.comment>div {
+      margin: 10px;
+    }
+
+
 
   </style>
 </head>
@@ -57,8 +115,57 @@
 <body>
   <script>
     get_data('{{param}}')
+    show_comment('{{param}}')
   </script>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand mx-3" href="/">ANONDiary</a>
+      <a class="mx-5" href="#">login</a>
+    </div>
+  </nav>
   <div class="container">
+    <div class="section mb-5" id="content">
+      <!-- <h3 class="title">제목</h3>
+      <div class="detailinfo">
+        <ul>
+          <li>글번호</li>
+          <li>작성자</li>
+          <li>등록일</li>
+          <li>조회수</li>
+        </ul>
+      </div>
+      <div class="content">내용</div> -->
+    </div>
+    <!-- <div class="section comment">
+      <div class="form-group">
+        <div class="input-group">
+          <input id="1" class="form-control" type="text" name="search" placeholder="comment" required />
+          <span class="input-group-btn ms-3">
+            <button class="btn btn-success" type="button" onclick="save_comment('{{param}}')">
+              <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="mybox" id="comment-list">
+      </div>
+    </div> -->
+    <div class="commentbox">
+      <div class="form-group">
+        <div class="input-group">
+          <input id="1" class="form-control" type="text" name="search" placeholder="Comment..." required />
+          <span class="input-group-btn ms-3">
+            <button class="btn btn-success" type="submit" onclick="save_comment('{{param}}')">
+              <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="mybox" id="comment-list">
+      </div>
+    </div>
+  </div>
+
 
   </div>
 </body>

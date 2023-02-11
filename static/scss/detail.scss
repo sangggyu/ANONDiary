@@ -1,0 +1,56 @@
+.container {
+  width: 100%;
+  .section {
+    width: 100%;
+    div,
+    h3 {
+      margin-top: 30px;
+    }
+    .detailinfo {
+      border-bottom: 1px solid #dfe1e7;
+      ul {
+        display: flex;
+        flex-direction: row;
+        justify-content: baseline;
+        align-items: center;
+        padding-left: 0;
+      }
+      li {
+        list-style: none;
+        margin-right: 20px;
+      }
+    }
+  }
+}
+
+.commentbox {
+  padding-top: 30px;
+  border-top: 1px solid #dfe1e7;
+  .input-group {
+    width: 50%;
+    margin: auto;
+    padding: auto;
+  }
+  .mybox {
+    width: 60%;
+    margin: auto;
+    padding: auto;
+    li.comment {
+      justify-content: space-between;
+      .comment_content {
+        .nickname {
+          font-size: 11px;
+          color: rgb(88, 88, 88);
+        }
+        width: 88%;
+        padding: 6px 12px;
+        border: 1px solid #dfe1e7;
+        border-radius: 10px;
+      }
+      div {
+        margin: auto;
+        padding: auto;
+      }
+    }
+  }
+}
