@@ -109,7 +109,11 @@ def api_valid():
 
 @app.route('/create_page')
 def createpage():
-    return render_template('create.html')
+    isLogin = api_valid()
+    if isLogin['result']:
+        return render_template('create.html', isLogin=isLogin['nickname'])
+    else:
+        return render_template('login.html')
 
 @app.route('/create', methods=["POST"])
 def create():
