@@ -5,8 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
@@ -16,15 +15,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <style>
         .wrap {
-            position: absolute;
-            left: 45%;
-            top: 20%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 100px;
+        }
+
+
+
+        .btnbox {
+            flex-direction: row;
+            display: flex;
+            width: 100%;
+            margin-top: 10px;
+            padding-right: 10px;
 
         }
 
-        .form-control {
-            margin: 5px;
+        .btnbox > button {
+            width: 100%;
+            margin-right: 5px;
+            height: 30px;
+            border-radius: 10px;
+            color: lightslategrey;
+
         }
+
+        input {
+            width: 100%;
+            height: 30px;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            border-radius: 20px;
+            color: red;
+        }
+
     </style>
     <script>
         function signup() {
@@ -51,26 +79,35 @@
 
 <body>
 <div class="wrap">
-    <div class="title">
+    <div class="title" style="width: 300px">
         <h1 class="display-4">회원가입</h1>
         <hr class="my-4">
         <div class="posting-box" id="post-box">
             <div class="form-group">
                 <label>ID</label>
                 <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-id" placeholder="">
+                       id="input-id" placeholder="생성할 ID를 입력!!!">
             </div>
             <div class="form-group">
                 <label>닉네임</label>
                 <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-nickname" placeholder="">
+                       id="input-nickname" placeholder="사용하실 닉네임을 입력!!!">
             </div>
             <div class="form-group">
                 <label>비밀번호</label>
                 <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-password" placeholder="">
+                       id="input-password" placeholder="비밀번호를 입력해주세요!!!">
             </div>
-            <button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>
+
+<!--    비밀번호 재확인        -->
+            <div class="form-group">
+                <label>비밀번호</label>
+                <input type="email" class="form-control" aria-describedby="emailHelp"
+                       id="input-password-check" placeholder="비밀번호를 다시 한번 입력해주세요!!!">
+            </div>
+            <div class="btnbox">
+                <button type="submit" onclick="signup()">회원가입</button>
+            </div>
         </div>
     </div>
 </div>
