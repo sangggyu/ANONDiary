@@ -32,6 +32,7 @@ div.info {
 
 .container {
   width: 100%;
+  margin-bottom: 100px;
 }
 .container div {
   margin-top: 30px;
@@ -41,10 +42,7 @@ div.info {
   padding: auto;
   width: 50%;
 }
-
-footer {
+.container button.post {
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  right: 200px;
 }/*# sourceMappingURL=main.css.map */
