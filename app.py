@@ -16,10 +16,6 @@ db = client.dbsparta
 def home():
   return render_template('index.html')
 
-<<<<<<< HEAD
-@app.route('/diary')
-def diary():
-  return render_template('page_info.html')
 @app.route("/diary/save", methods=["POST"])
 def diary_save():
     diary_list = list(db.anondiary.find({}))
@@ -36,12 +32,7 @@ def diary_save():
     }
     db.anondiary.insert_one(doc)
     return jsonify({'msg': '일기 기록 완료!'})
-@app.route("/diary/show", methods=["GET"])
-def diary_get():
-    num = request.form['num_give']
-    diary = db.anondiary.find_one({'num': num})
-    return jsonify({'diary':diary})
-=======
+
 # 메인페이지 일기 보여주기
 @app.route("/diary", methods=["GET"])
 def diary_get():
@@ -121,8 +112,34 @@ def get_data(param):
   print(num,file=sys.stderr)
   detail_data = db.diary.find_one({'num': num},{'_id':False})
   return jsonify({'data': detail_data})
+# diary_modify 페이지
+@app.route("/diary/modify_open/<param>")
+def modify_open(param):
+    # print(param,file=sys.stderr)
+    return render_template("diary_modify.html", param=param)
 
->>>>>>> d0198e3128eba01c676fa6bc76e9269c1f6cdb63
+@app.route("/diary/modify_open/<param>", methods=["POST"])
+def get_modify(param):
+  num = int(param)
+  print(num,file=sys.stderr)
+  modify_data = db.diary.find_one({'num': num},{'_id':False})
+  return jsonify({'data': modify_data})
+if __name__ == '__main__':
+    app.run('0.0.0.0', port=4000, debug=True)
+
+@app.route("/diary/modify/<param>")
+def diary_modify(param):
+    print("@",param,file=sys.stderr)
+    return render_template("detail.html", param=param)
+
+@app.route("/diary/modify/<param>", methods=["POST"])
+def update_modify(param):
+  num = int(param)
+  title = request.form['title']
+  content = request.form['content']
+  print(num,file=sys.stderr)
+  db.diary.update_one({'num': num}, {'$set': {'title': title,'content':content}})
+  return jsonify({'msg': '수정 완료!'})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)
