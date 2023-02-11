@@ -94,5 +94,6 @@ def get_data(param):
   detail_data = db.diary.find_one({'num': num},{'_id':False})
   return jsonify({'data': detail_data})
 
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=4000, debug=True)
