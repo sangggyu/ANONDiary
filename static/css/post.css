@@ -23,28 +23,22 @@ a {
   text-decoration: none;
 }
 
-div.info {
-  width: 100%;
-  text-align: center;
-  padding: 40px;
-  border-bottom: 1px solid #dfe1e7;
-}
-
 .container {
   width: 100%;
-}
-.container div {
-  margin-top: 30px;
-}
-.container div.search {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   margin: auto;
   padding: auto;
-  width: 50%;
 }
-
-footer {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}/*# sourceMappingURL=main.css.map */
+.container form div {
+  margin-top: 10px;
+}
+.container form div input {
+  border-radius: 10px;
+}
+.container form div textarea {
+  border-radius: 10px;
+}/*# sourceMappingURL=post.css.map */
