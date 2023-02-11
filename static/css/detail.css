@@ -17,10 +17,6 @@ a {
   padding: 2px 5px;
   background-color: white;
 }
-a:hover {
-  border: 1.5px solid #6c6c6c;
-  color: #6c6c6c;
-}
 .commentBox {
   height: 500px;
   margin: 17px auto 10px auto;
