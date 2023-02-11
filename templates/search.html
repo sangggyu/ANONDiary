@@ -12,9 +12,36 @@
   <link rel="stylesheet" href="../static/css/main.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9943d403d9bf3ae9286778e8bb29358b"></script>
-  <script src="../static/js/main.js"></script>
   <script src="https://kit.fontawesome.com/8924a45e02.js" crossorigin="anonymous"></script>
-  <title>메인페이지</title>
+  <title>검색결과</title>
+  <!-- <script>
+    function search_content() {
+      $("#total_diary").empty();
+      $.ajax({
+        type: "POST",
+        url: "/search",
+        data: {},
+        success: function(response) {
+          console.log(response);
+          let rows = response["list"];
+          for (let i = 0; i <
+            rows.length; i++) {
+            let num = rows[i]["num"];
+            let title = rows[i]["title"];
+            let content = rows[i]["content"];
+            let temp_html = `<tr>
+                <th scope="row">${num}</th>
+                <td><a href="/detail/${num}">${title}</a></td>
+                <td>Otto</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                </tr>`;
+            $(".total_diary").append(temp_html);
+          }
+        },
+      });
+    }
+  </script> -->
 </head>
 
 <body>
@@ -28,7 +55,7 @@
     <!-- 데이터 확인 버튼 -->
     <!-- <button onclick="show_content()">click</button> -->
   </nav>
-  <div class="info">
+  <!-- <div class="info">
     <ul>
       <li>
         <h3>익명 다이어리</h3>
@@ -37,7 +64,7 @@
         누군가에게 털어놓고 싶거나, 조언을 구하고 싶은 이야기들이 있지 않나요? <br>
         그렇다면 이 곳 ANONDiary를 이용해 주세요 !</li>
     </ul>
-  </div>
+  </div> -->
   <div class="container">
     <div class="search">
       <form action="/search" method="POST" class="search_form">
@@ -76,32 +103,18 @@
           </tr>
         </thead>
         <tbody class="total_diary">
-          <!-- <tr>
-            <th scope="row">1</th>
-            <td><a href="#">Mark</a></td>
-            <td>Otto</td>
-            <td>@mdo</td>
-            <td>@mdo</td>
-          </tr>
+          {% for i in list %}
           <tr>
-            <th scope="row">2</th>
-            <td><a href="#">Mark</a></td>
+            <th scope="row">{{i.num}}</th>
+            <td><a href="#">{{i.title}}</a></td>
             <td>Thornton</td>
             <td>@fat</td>
             <td>@mdo</td>
           </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td><a href="#">Mark</a></td>
-            <td>@twitter</td>
-            <td>@twitter</td>
-            <td>@mdo</td>
-          </tr> -->
+          {% endfor %}
         </tbody>
       </table>
     </div>
-    <button type="button" class="btn btn-primary" onclick="show_popup_create()">일기 쓰기</button>
   </div>
   <footer>@ANONDiary</footer>
 </body>
