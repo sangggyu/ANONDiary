@@ -17,7 +17,9 @@ from flask_jwt_extended import get_jti
 
 import certifi
 ca = certifi.where()
-client = MongoClient('mongodb+srv://test:thals@cluster0.kbk9mgh.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
+# client = MongoClient('mongodb+srv://test:thals@cluster0.kbk9mgh.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
+client = MongoClient('mongodb+srv://parkmj4312:Qkrp4918@cluster0.serijac.mongodb.net/?retryWrites=true&w=majority')
+
 db = client.dbsparta
 
 @app.route('/')
@@ -27,6 +29,31 @@ def home():
     return render_template('index.html',isLogin=isLogin['result'])
   else:
     return render_template('index.html',isLogin=isLogin['result'])
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route("/diary/save", methods=["POST"])
+def diary_save():
+    diary_list = list(db.anondiary.find({}))
+    numlist = [0]
+    for a in diary_list:
+        numlist.append(a['num'])
+    count = max(numlist) + 1
+    name = request.form['name_give']
+    comment = request.form['comment_give']
+    doc = {
+    'num':count,
+    'name':name,
+    'comment':comment
+    }
+    db.anondiary.insert_one(doc)
+    return jsonify({'msg': '일기 기록 완료!'})
 
 # 메인페이지 일기 보여주기
 @app.route("/diary", methods=["GET"])
@@ -159,6 +186,34 @@ def get_data(param):
   detail_data = db.diary.find_one_and_update({'diaryid': diaryid},{"$inc":{"view":1}},{'_id':False})
   # detail_data = db.diary.find_one({'diaryid': diaryid},{'_id':False})
   return jsonify({'data': detail_data})
+# diary_modify 페이지
+@app.route("/diary/modify_open/<param>")
+def modify_open(param):
+    # print(param,file=sys.stderr)
+    return render_template("diary_modify.html", param=param)
+
+@app.route("/diary/modify_open/<param>", methods=["POST"])
+def get_modify(param):
+  num = int(param)
+  print(num,file=sys.stderr)
+  modify_data = db.diary.find_one({'num': num},{'_id':False})
+  return jsonify({'data': modify_data})
+if __name__ == '__main__':
+    app.run('0.0.0.0', port=4000, debug=True)
+
+@app.route("/diary/modify/<param>")
+def diary_modify(param):
+    print("@",param,file=sys.stderr)
+    return render_template("detail.html", param=param)
+
+@app.route("/diary/modify/<param>", methods=["POST"])
+def update_modify(param):
+  num = int(param)
+  title = request.form['title']
+  content = request.form['content']
+  print(num,file=sys.stderr)
+  db.diary.update_one({'num': num}, {'$set': {'title': title,'content':content}})
+  return jsonify({'msg': '수정 완료!'})
 
 # detail > comment
 # 댓글 등록
