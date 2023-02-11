@@ -10,12 +10,11 @@
   <!-- JavaScript Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="../static/css/detail.css">
-  <script src="../static/js/diary.js"></script>
+  <!-- <script src="../static/js/diary.js"></script> -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9943d403d9bf3ae9286778e8bb29358b"></script>
   <script src="https://kit.fontawesome.com/8924a45e02.js" crossorigin="anonymous"></script>
   <script defer src="../static/js/detail.js"></script>
-  <link rel="stylesheet" href="../static/css/detail.css">
   <title>상세페이지</title>
 
   <script>
@@ -27,47 +26,30 @@
         url: "/detail/" + param,
         data: {},
         success: function(res) {
-          // console.log(res);
+          console.log(res);
           data = res.data;
           let diaryid = data.diaryid
           let title = data.title;
           let content = data.content;
+          let createdate = data.createtime;
+          let nick = data.nick;
           let view = data.view;
           let temp_html = `<h3 class="title">${title}</h3>
           <div class="detailinfo">
             <ul>
               <li>글번호 : ${diaryid}</li>
-              <li>작성자</li>
-              <li>등록일</li>
+              <li>작성자 : ${nick}</li>
+              <li>등록일 : ${createdate}</li>
               <li>조회수 : ${view}</li>
             </ul>
           </div>
           <div class="content">${content}</div>`;
           $("#content").append(temp_html);
-
-          let temp_html = ``;
-          temp_html =`<div class="box">
-                        <div>
-                          <span class="name form-control" id="name">${title}</span>
-                        </div>
-                        <div class="commentBox form-control" id="comment">${content}
-                        </div>
-                        <a href="/diary/modify_open/${param}" type="button" class="btn btn-outline-primary">수정
-                        </a>
-                        <button onClick="done_bucket(${param})" type="button" class="btn btn-outline-primary">삭제
-                        </button>
-                        <button onClick="done_bucket(${param})" type="button" class="btn btn-outline-primary">댓글덜기
-                        </button>
-                     </div>
-          `
-          $(".container").append(temp_html);
-
         }
       })
     }
 
     function show_comment(param) {
-      console.log(param);
       $("#comment-list").empty();
       $.ajax({
         type: "POST",
@@ -81,9 +63,10 @@
             let comment = rows[i]["comment"];
             let commentid = rows[i]["commentid"];
             let diaryid = rows[i]["diaryid"];
+            let nick = rows[i]['nick'];
             let temp_html = `<li class="comment">
                               <div class="comment_content">
-                                <div class="nickname">닉네임</div>
+                                <div class="nickname">${nick}</div>
                                 <div>${comment}</div>
                               </div>
                               <div class="btn">
@@ -106,9 +89,6 @@
     li.comment>div {
       margin: 10px;
     }
-
-
-
   </style>
 </head>
 
@@ -155,7 +135,7 @@
         <div class="input-group">
           <input id="1" class="form-control" type="text" name="search" placeholder="Comment..." required />
           <span class="input-group-btn ms-3">
-            <button class="btn btn-success" type="submit" onclick="save_comment('{{param}}')">
+            <button class="btn btn-success" type="submit" onclick="save_comment('{{param}}', '{{isLogin}}')">
               <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search
             </button>
           </span>
@@ -166,8 +146,6 @@
     </div>
   </div>
 
-
-  </div>
 </body>
 
 </html>

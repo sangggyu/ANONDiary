@@ -19,17 +19,35 @@ function show_content() {
         let num = rows[i]["diaryid"];
         let title = rows[i]["title"];
         let view = rows[i]["view"];
-        let nickname = rows[i]["nickname"];
+        let createtime = gettimestamp(rows[i]["createtime"]);
+        // let createtime = rows[i]["createtime"];
+        let nickname = rows[i]["nick"];
         let content = rows[i]["content"];
         let temp_html = `<tr>
                           <th scope="row">${num}</th>
                           <td><a href="/detail/${num}">${title}</a></td>
                           <td>${nickname}</td>
-                          <td>@mdo</td>
+                          <td>${createtime}</td>
                           <td>${view}</td>
                         </tr>`;
         $(".total_diary").append(temp_html);
       }
     },
   });
+}
+
+function gettimestamp(createtime) {
+  //console.log(createtime)
+  createtime = createtime.substr(0, 19).replace("T", " ");
+  var startDate = new Date(createtime);
+  var endDate = new Date(); // 현재시각
+  var seconds = (endDate.getTime() - startDate.getTime()) / 1000; // 두 데이타 갭
+
+  if (seconds > 3600 * 24) {
+    // 24시간 보다 작으면
+    return createtime;
+  } else {
+    return createtime.substr(11, 19);
+    //return new Date(seconds * 1000).toISOString().slice(11, 19);
+  }
 }

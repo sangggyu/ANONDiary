@@ -6,6 +6,7 @@ app = Flask(__name__)
 from pymongo import MongoClient
 
 import hashlib
+
 import datetime
 
 import jwt
@@ -17,8 +18,8 @@ from flask_jwt_extended import get_jti
 
 import certifi
 ca = certifi.where()
-# client = MongoClient('mongodb+srv://test:thals@cluster0.kbk9mgh.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
-client = MongoClient('mongodb+srv://parkmj4312:Qkrp4918@cluster0.serijac.mongodb.net/?retryWrites=true&w=majority')
+client = MongoClient('mongodb+srv://test:thals@cluster0.kbk9mgh.mongodb.net/Cluster0?retryWrites=true&w=majority', tlsCAFile=ca)
+# client = MongoClient('mongodb+srv://parkmj4312:Qkrp4918@cluster0.serijac.mongodb.net/?retryWrites=true&w=majority')
 
 db = client.dbsparta
 
@@ -26,34 +27,26 @@ db = client.dbsparta
 def home():
   isLogin = api_valid()
   if isLogin['result']:
-    return render_template('index.html',isLogin=isLogin['result'])
+    return render_template('index.html',isLogin=isLogin)
   else:
-    return render_template('index.html',isLogin=isLogin['result'])
+    return render_template('index.html',isLogin=isLogin)
 
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-@app.route("/diary/save", methods=["POST"])
-def diary_save():
-    diary_list = list(db.anondiary.find({}))
-    numlist = [0]
-    for a in diary_list:
-        numlist.append(a['num'])
-    count = max(numlist) + 1
-    name = request.form['name_give']
-    comment = request.form['comment_give']
-    doc = {
-    'num':count,
-    'name':name,
-    'comment':comment
-    }
-    db.anondiary.insert_one(doc)
-    return jsonify({'msg': '일기 기록 완료!'})
+# @app.route("/diary/save", methods=["POST"])
+# def diary_save():
+#     diary_list = list(db.anondiary.find({}))
+#     numlist = [0]
+#     for a in diary_list:
+#         numlist.append(a['num'])
+#     count = max(numlist) + 1
+#     name = request.form['name_give']
+#     comment = request.form['comment_give']
+#     doc = {
+#     'num':count,
+#     'name':name,
+#     'comment':comment
+#     }
+#     db.anondiary.insert_one(doc)
+#     return jsonify({'msg': '일기 기록 완료!'})
 
 # 메인페이지 일기 보여주기
 @app.route("/diary", methods=["GET"])
@@ -146,14 +139,18 @@ def createpage():
 def create():
     title = request.form['title']
     content = request.form['comment']
+    nick = request.form['nick']
     count = list(db.diary.find({},{'_id':False}))
-
+    create_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    
     if count == []:
         diaryid = 1
         doc = {
             'diaryid':diaryid,
+            'nick': nick,
             'title':title,
             'content':content,
+            'createtime':create_time,
             'view': 0,
         }
         db.diary.insert_one(doc)
@@ -166,8 +163,10 @@ def create():
         diaryid = diaryid + 1
         doc = {
             'diaryid':diaryid,
+            'nick': nick,
             'title':title,
             'content':content,
+            'createtime':create_time,
             'view': 0,
         }
         db.diary.insert_one(doc)
@@ -176,49 +175,55 @@ def create():
 # detail 페이지
 @app.route("/detail/<param>")
 def detail(param):
+    isLogin = api_valid()
+    if isLogin['result']:
+        return render_template('detail.html', isLogin=isLogin['nickname'],param=param)
+    else:
+        return render_template('detail.html', param=param)
     # print(param,file=sys.stderr)
-    return render_template("detail.html", param=param)
 
 @app.route("/detail/<param>", methods=["POST"])
 def get_data(param):
   diaryid = int(param)
-  print(diaryid,file=sys.stderr)
+#   print(diaryid,file=sys.stderr)
   detail_data = db.diary.find_one_and_update({'diaryid': diaryid},{"$inc":{"view":1}},{'_id':False})
   # detail_data = db.diary.find_one({'diaryid': diaryid},{'_id':False})
   return jsonify({'data': detail_data})
-# diary_modify 페이지
-@app.route("/diary/modify_open/<param>")
-def modify_open(param):
-    # print(param,file=sys.stderr)
-    return render_template("diary_modify.html", param=param)
 
-@app.route("/diary/modify_open/<param>", methods=["POST"])
-def get_modify(param):
-  num = int(param)
-  print(num,file=sys.stderr)
-  modify_data = db.diary.find_one({'num': num},{'_id':False})
-  return jsonify({'data': modify_data})
-if __name__ == '__main__':
-    app.run('0.0.0.0', port=4000, debug=True)
+# # diary_modify 페이지
+# @app.route("/diary/modify_open/<param>")
+# def modify_open(param):
+#     # print(param,file=sys.stderr)
+#     return render_template("diary_modify.html", param=param)
 
-@app.route("/diary/modify/<param>")
-def diary_modify(param):
-    print("@",param,file=sys.stderr)
-    return render_template("detail.html", param=param)
+# @app.route("/diary/modify_open/<param>", methods=["POST"])
+# def get_modify(param):
+#   num = int(param)
+#   print(num,file=sys.stderr)
+#   modify_data = db.diary.find_one({'num': num},{'_id':False})
+#   return jsonify({'data': modify_data})
+# if __name__ == '__main__':
+#     app.run('0.0.0.0', port=4000, debug=True)
 
-@app.route("/diary/modify/<param>", methods=["POST"])
-def update_modify(param):
-  num = int(param)
-  title = request.form['title']
-  content = request.form['content']
-  print(num,file=sys.stderr)
-  db.diary.update_one({'num': num}, {'$set': {'title': title,'content':content}})
-  return jsonify({'msg': '수정 완료!'})
+# @app.route("/diary/modify/<param>")
+# def diary_modify(param):
+#     print("@",param,file=sys.stderr)
+#     return render_template("detail.html", param=param)
+
+# @app.route("/diary/modify/<param>", methods=["POST"])
+# def update_modify(param):
+#   num = int(param)
+#   title = request.form['title']
+#   content = request.form['content']
+#   print(num,file=sys.stderr)
+#   db.diary.update_one({'num': num}, {'$set': {'title': title,'content':content}})
+#   return jsonify({'msg': '수정 완료!'})
 
 # detail > comment
 # 댓글 등록
 @app.route("/commentsave", methods=["POST"])
 def comment_post():
+    nick = request.form['nick']
     comment_receive = request.form["comment_give"]
     diaryid = request.form["param_give"]
     count = list(db.comment.find({}, {'_id': False}))
@@ -226,6 +231,7 @@ def comment_post():
 
     doc = {
         'commentid': commentid,
+        'nick': nick,
         'diaryid': diaryid,
         'comment': comment_receive,
     }
@@ -237,7 +243,7 @@ def comment_post():
 @app.route("/commentshow", methods=["POST"])
 def comment_get():
     recive_contentid = request.form['give_contentid']
-
+    print("@",recive_contentid ,file=sys.stderr)
     comment_list = list(db.comment.find(
         {'diaryid': recive_contentid}, {'_id': False}))
     return jsonify({'commentlist': comment_list})

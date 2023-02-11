@@ -2,15 +2,17 @@
 //   show_comment();
 // });
 
-function save_comment(param) {
-  console.log(param);
+function save_comment(param, isLogin) {
+  // console.log(param, isLogin);
   let comment = $("#1").val();
+  let nick = isLogin;
   $.ajax({
     type: "POST",
     url: "/commentsave",
     data: {
       comment_give: comment,
       param_give: param,
+      nick: nick,
     },
     success: function (response) {
       alert(response["msg"]);

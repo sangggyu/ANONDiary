@@ -14,17 +14,18 @@
 </head>
 <script>
   // 일기 작성 nickname 받아와서 저장하기 부터 
-  function post() {
-    let name = $('#name').val()
+  function post(nickname) {
+    let title = $('#name').val()
     let comment = $('#comment').val()
-    let nickname = '{{isLogin}}'
+    let nick = nickname
 
     $.ajax({
       type: "POST",
       url: "/create",
       data: {
         title: title,
-        comment: comment
+        comment: comment,
+        nick: nick
       },
       success: function(response) {
         if (response['msgnot']) {
@@ -49,7 +50,7 @@
       <div class="commentBox">
         <textarea class="commentBox form-control" placeholder="오늘 하루를 이야기 해주세요" id="comment"></textarea>
       </div>
-      <a onclick="post()">작성하기</a>
+      <a onclick="post('{{isLogin}}')">작성하기</a>
     </div>
   </div>
 

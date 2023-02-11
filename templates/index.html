@@ -29,7 +29,7 @@
     // }
 
     $(document).ready(function() {
-      show_login('{{isLogin}}');
+      show_login('{{isLogin.result}}');
     });
 
     function logout() {
@@ -40,7 +40,7 @@
     }
 
     function show_login(isLogin) {
-      console.log(isLogin)
+      // console.log(isLogin)
       // $('.container-fluid').empty();
       let temp_html = ``
       if (isLogin == 'True') {
